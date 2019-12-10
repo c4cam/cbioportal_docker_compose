@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  cbioDB:
+    build: ./cbioportal-db
+    image: c4cam/mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=P@ssword1
+      - MYSQL_USER=cbio
+      - MYSQL_PASSWORD=P@ssword1
+      - MYSQL_DATABASE=cbioportal
+    volumes:
+      - "./shared/mysql/cbioportal:/var/lib/mysql"
+#      - "./backup:/backup"
+
+  cbioportal:
+    build: ./cbioportal
+    image: c4cam/cbioportal:3.1.6
+    ports: 
+      - 8880:8080
+    environment:
+      - "CATALINA_OPTS=-Xms2g -Xmx4g"
+    volumes:
+      - "./cbioportal/portal.properties:/cbioportal/portal.properties:ro"
+    depends_on:
+      - cbioDB
+
+  mongoDB:
+    image: mongo:3.6.6
+    environment:
+      - MONGO_INITDB_DATABASE=session_service
+
+  cbioSessionService:
+    image: cbioportal/session-service:latest
+    environment:
+      - JAVA_OPTS=-Dspring.data.mongodb.uri=mongodb://mongoDB:27017/session-service
+      - SERVER_PORT=5000
+    depends_on:
+      - mongoDB
