@@ -11,7 +11,6 @@ services:
       - MYSQL_DATABASE=cbioportal
     volumes:
       - "./shared/mysql/cbioportal:/var/lib/mysql"
-#      - "./backup:/backup"
 
   cbioportal:
     build: ./cbioportal
